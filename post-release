@@ -5,7 +5,7 @@ SCALE_FILE="$DOKKU_ROOT/$APP/SCALE"
 IGNORE_FILE = "$DOKKU_ROOT/$APP/SUPERVISOR_IGNORE"
 set -e
 
-if [ -f "$IGNORE_FILE" ]; then
+if [ ! -f "$IGNORE_FILE" ]; then
 	PLUGIN_DIR=$(dirname $0)
 	. "$PLUGIN_DIR/lib/helpers"
 
