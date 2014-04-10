@@ -1,12 +1,12 @@
 #!/bin/bash
 APP="$1"
 IMAGE="app/$1"
-SCALE_FILE="$DOKKU_ROOT/$APP/SCALE"
-IGNORE_FILE = "$DOKKU_ROOT/$APP/SUPERVISOR_IGNORE"
+SCALE_FILE="$DOKKU_ROOT/$APP/SCALE" 
 set -e
 
-if [ -f $IGNORE_FILE ]; then
-	echo "Found Supervisor Ignore file, supervisor will not be injected"
+echo "check if $DOKKU_ROOT/$APP/SUPERVISOR_IGNORE exists"
+if [ -f "$DOKKU_ROOT/$APP/SUPERVISOR_IGNORE" ]; then
+	echo "-----> Found Supervisor Ignore file, supervisor will not be injected"
 else
 
 	PLUGIN_DIR=$(dirname $0)
