@@ -2,21 +2,25 @@
 APP="$1"
 IMAGE="app/$1"
 SCALE_FILE="$DOKKU_ROOT/$APP/SCALE"
-
+IGNORE_FILE = "$DOKKU_ROOT/$APP/SUPERVISOR_IGNORE"
 set -e
 
-PLUGIN_DIR=$(dirname $0)
-. "$PLUGIN_DIR/lib/helpers"
+if [ -f "$IGNORE_FILE" ]; then
+	PLUGIN_DIR=$(dirname $0)
+	. "$PLUGIN_DIR/lib/helpers"
 
-copy_to_container "$PLUGIN_DIR/lib/procfile-to-supervisord" /build/procfile-to-supervisord
-if [ -f "$SCALE_FILE" ]; then
-  echo "Found SCALE file: $SCALE_FILE"
-  copy_to_container "$SCALE_FILE" /SCALE
+	copy_to_container "$PLUGIN_DIR/lib/procfile-to-supervisord" /build/procfile-to-supervisord
+	if [ -f "$SCALE_FILE" ]; then
+	  echo "Found SCALE file: $SCALE_FILE"
+	  copy_to_container "$SCALE_FILE" /SCALE
+	else
+	  echo "No SCALE file found; will use default of one process per entry in Procfile."
+	fi
+
+	echo "-----> Injecting Logging Supervisor ..."
+	id=$(cat "$PLUGIN_DIR/lib/runner" | docker run -i -a stdin $IMAGE /bin/bash -c "cat > /start && apt-get update && apt-get install -y supervisor && apt-get clean")
+	test $(docker wait $id) -eq 0
+	docker commit $id $IMAGE > /dev/null
 else
-  echo "No SCALE file found; will use default of one process per entry in Procfile."
+	echo "Found Supervisor Ignore file, supervisor will not be injected"
 fi
-
-echo "-----> Injecting Logging Supervisor ..."
-id=$(cat "$PLUGIN_DIR/lib/runner" | docker run -i -a stdin $IMAGE /bin/bash -c "cat > /start && apt-get update && apt-get install -y supervisor && apt-get clean")
-test $(docker wait $id) -eq 0
-docker commit $id $IMAGE > /dev/null
