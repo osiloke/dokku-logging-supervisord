@@ -5,7 +5,10 @@ SCALE_FILE="$DOKKU_ROOT/$APP/SCALE"
 IGNORE_FILE = "$DOKKU_ROOT/$APP/SUPERVISOR_IGNORE"
 set -e
 
-if [ ! -f "$IGNORE_FILE" ]; then
+if [ -f $IGNORE_FILE ]; then
+	echo "Found Supervisor Ignore file, supervisor will not be injected"
+else
+
 	PLUGIN_DIR=$(dirname $0)
 	. "$PLUGIN_DIR/lib/helpers"
 
@@ -20,7 +23,5 @@ if [ ! -f "$IGNORE_FILE" ]; then
 	echo "-----> Injecting Logging Supervisor ..."
 	id=$(cat "$PLUGIN_DIR/lib/runner" | docker run -i -a stdin $IMAGE /bin/bash -c "cat > /start && apt-get update && apt-get install -y supervisor && apt-get clean")
 	test $(docker wait $id) -eq 0
-	docker commit $id $IMAGE > /dev/null
-else
-	echo "Found Supervisor Ignore file, supervisor will not be injected"
+	docker commit $id $IMAGE > /dev/null 
 fi
