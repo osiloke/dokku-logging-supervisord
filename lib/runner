@@ -1,15 +1,15 @@
 #!/bin/bash
 
 set -e
-export HOME=/dokku
+export HOME=/app
 hash -r
 cd $HOME
 
 # Generate supervisord.conf:
-bash /build/procfile-to-supervisord /dokku/Procfile /SCALE > supervisord.conf
+bash /build/procfile-to-supervisord /app/Procfile /SCALE > supervisord.conf
 
 # Create /var/log/app directory
-mkdir -p /var/log/dokku
+mkdir -p /var/log/app
 
 # Display the generated supervisord.conf:
 echo "Generated supervisord.conf:"
